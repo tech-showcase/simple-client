@@ -19,6 +19,7 @@ This service serve data that is mentioned above through HTTP.
   "api_gateway_address": "http://localhost:8081"
 }
 ```
+change `localhost` with `docker0` IP address
 - Build and run docker image as below
 ```shell script
 $ docker build -t simple-client .
