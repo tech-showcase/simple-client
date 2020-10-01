@@ -1,10 +1,7 @@
 package config
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"os"
-	"strings"
 )
 
 type (
@@ -13,34 +10,23 @@ type (
 	}
 )
 
-func Parse() (config Config, err error) {
-	configPath := GetPath()
+var Instance = Config{}
 
-	configFileContent, err := ioutil.ReadFile(configPath)
-	if err != nil {
-		return
-	}
-
-	err = json.Unmarshal(configFileContent, &config)
-	if err != nil {
-		return
-	}
-
-	config.APIGatewayAddress = strings.TrimSuffix(config.APIGatewayAddress, "/")
+func Read() (config Config) {
+	config = readFromEnvVar()
 
 	return
 }
 
-func GetPath() string {
-	environment := "DEV"
-	if environmentFromEnvVar := os.Getenv("ENVIRONMENT"); environmentFromEnvVar != "" {
-		environment = environmentFromEnvVar
-	}
+func readFromEnvVar() (config Config) {
+	config.APIGatewayAddress = readEnvVarWithDefaultValue("API_GATEWAY_ADDRESS", "http://localhost")
 
-	configPath := "config/config-dev.json"
-	if configPathFromEnvVar := os.Getenv(environment + "_CONFIG_PATH"); configPathFromEnvVar != "" {
-		configPath = configPathFromEnvVar
-	}
+	return
+}
 
-	return configPath
+func readEnvVarWithDefaultValue(key, defaultValue string) string {
+	if envVarValue, ok := os.LookupEnv(key); ok {
+		return envVarValue
+	}
+	return defaultValue
 }
