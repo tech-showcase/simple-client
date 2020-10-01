@@ -12,8 +12,6 @@ type (
 	MovieService interface {
 		Search(context.Context, string, int) (movie.ListPerPage, error)
 	}
-
-	MovieServiceMiddleware func(MovieService) MovieService
 )
 
 func NewMovieService(movieClientEndpoint movie.ClientEndpoint) MovieService {

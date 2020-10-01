@@ -30,7 +30,7 @@ type (
 	}
 )
 
-func NewMovieClientEndpoint(address string) ClientEndpoint {
+func NewMovieClientEndpoint(address string) (ClientEndpoint, error) {
 	instance := clientEndpoint{}
 
 	if !strings.HasPrefix(address, "http") {
@@ -39,11 +39,11 @@ func NewMovieClientEndpoint(address string) ClientEndpoint {
 
 	u, err := url.Parse(address)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	instance.address = u
 
-	return &instance
+	return &instance, nil
 }
 
 func (instance *clientEndpoint) Search(ctx context.Context, keyword string, pageNumber int) (movieData ListPerPage, err error) {

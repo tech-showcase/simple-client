@@ -21,7 +21,10 @@ func main() {
 
 	ctx := context.Background()
 
-	movieClientEndpoint := movie.NewMovieClientEndpoint(config.Instance.APIGatewayAddress)
+	movieClientEndpoint, err := movie.NewMovieClientEndpoint(config.Instance.APIGatewayAddress)
+	if err != nil {
+		panic(err)
+	}
 	movieService := service.NewMovieService(movieClientEndpoint)
 	movieData, err := movieService.Search(ctx, args.Keyword, args.PageNumber)
 	if err != nil {
