@@ -4,18 +4,12 @@ import (
 	"net/url"
 )
 
-func JoinURL(baseUrlStr, pathUrlStr string) (joinedUrlStr string, err error) {
-	baseUrl, err := url.Parse(baseUrlStr)
-	if err != nil {
-		return
-	}
-
+func JoinURL(baseUrl *url.URL, pathUrlStr string) (joinedUrlStr *url.URL, err error) {
 	pathUrl, err := url.Parse(pathUrlStr)
 	if err != nil {
 		return
 	}
 
-	joinedUrlStr = baseUrl.ResolveReference(pathUrl).String()
-
+	joinedUrlStr = baseUrl.ResolveReference(pathUrl)
 	return
 }

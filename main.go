@@ -3,11 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/tech-showcase/entertainment-service/cmd"
 	"github.com/tech-showcase/entertainment-service/config"
-	"github.com/tech-showcase/entertainment-service/helper"
-	"github.com/tech-showcase/entertainment-service/transport"
-	"net/http"
+	"github.com/tech-showcase/entertainment-service/model/movie"
+	"github.com/tech-showcase/entertainment-service/service"
 )
 
 func init() {
@@ -18,16 +18,15 @@ func main() {
 	fmt.Println("Hi, I am Simple Client!")
 
 	args := cmd.Parse()
-	portStr := fmt.Sprintf(":%d", args.Port)
 
 	ctx := context.Background()
 
-	logger := helper.NewLogger(portStr)
+	movieClientEndpoint := movie.NewMovieClientEndpoint(config.Instance.APIGatewayAddress)
+	movieService := service.NewMovieService(movieClientEndpoint)
+	movieData, err := movieService.Search(ctx, args.Keyword, args.PageNumber)
+	if err != nil {
+		panic(err)
+	}
 
-	instances := make([]string, 0)
-	searchMovieInstance, _ := helper.JoinURL(config.Instance.APIGatewayAddress, "/movie/search")
-	instances = append(instances, searchMovieInstance)
-
-	http.Handle("/search", transport.NewSearchMovieHTTPServer(ctx, instances, logger))
-	http.ListenAndServe(portStr, nil)
+	spew.Dump(movieData)
 }

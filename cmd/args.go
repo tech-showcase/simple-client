@@ -6,12 +6,14 @@ import (
 
 type (
 	Args struct {
-		Port int `json:"port"`
+		Keyword    string `json:"keyword"`
+		PageNumber int    `json:"page_number"`
 	}
 )
 
 func Parse() (args Args) {
-	flag.IntVar(&args.Port, "port", 8080, "Port which service will listen to")
+	flag.StringVar(&args.Keyword, "keyword", "", "Keyword that is used to search contents")
+	flag.IntVar(&args.PageNumber, "page-number", 1, "Page number of search result that will be accessed")
 	flag.Parse()
 
 	return
