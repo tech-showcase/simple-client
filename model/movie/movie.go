@@ -2,8 +2,7 @@ package movie
 
 import (
 	"context"
-	httptransport "github.com/go-kit/kit/transport/http"
-	"github.com/tech-showcase/entertainment-service/helper"
+	"github.com/go-kit/kit/endpoint"
 	"net/url"
 	"strings"
 )
@@ -24,6 +23,7 @@ type (
 
 	clientEndpoint struct {
 		address *url.URL
+		search  endpoint.Endpoint
 	}
 	ClientEndpoint interface {
 		Search(ctx context.Context, keyword string, pageNumber int) (movieData ListPerPage, err error)
@@ -43,24 +43,17 @@ func NewMovieClientEndpoint(address string) (ClientEndpoint, error) {
 	}
 	instance.address = u
 
+	instance.search = makeSearchMovieClientEndpoint(u)
+
 	return &instance, nil
 }
 
 func (instance *clientEndpoint) Search(ctx context.Context, keyword string, pageNumber int) (movieData ListPerPage, err error) {
-	searchMovieURL, _ := helper.JoinURL(instance.address, "/movie/search")
-
-	movieClientEndpoint := httptransport.NewClient(
-		"POST",
-		searchMovieURL,
-		encodeHTTPRequest,
-		decodeSearchMovieHTTPResponse,
-	).Endpoint()
-
 	req := SearchMovieRequest{
 		Keyword:    keyword,
 		PageNumber: pageNumber,
 	}
-	response, err := movieClientEndpoint(ctx, req)
+	response, err := instance.search(ctx, req)
 	if err != nil {
 		return ListPerPage{}, err
 	}

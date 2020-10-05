@@ -1,11 +1,15 @@
 package movie
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"errors"
+	"github.com/go-kit/kit/endpoint"
+	httptransport "github.com/go-kit/kit/transport/http"
+	"github.com/tech-showcase/entertainment-service/helper"
 	"net/http"
+	"net/url"
+	"strconv"
 )
 
 type (
@@ -18,13 +22,30 @@ type (
 	}
 )
 
-func encodeHTTPRequest(_ context.Context, r *http.Request, request interface{}) error {
-	var buf bytes.Buffer
-	if err := json.NewEncoder(&buf).Encode(request); err != nil {
-		return err
+func makeSearchMovieClientEndpoint(movieServiceURL *url.URL) endpoint.Endpoint {
+	searchMovieURL, _ := helper.JoinURL(movieServiceURL, "/movie")
+
+	searchMovieClientEndpoint := httptransport.NewClient(
+		http.MethodPost,
+		searchMovieURL,
+		encodeSearchMovieHTTPRequest,
+		decodeSearchMovieHTTPResponse,
+	).Endpoint()
+
+	return searchMovieClientEndpoint
+}
+
+func encodeSearchMovieHTTPRequest(_ context.Context, r *http.Request, request interface{}) error {
+	if req, ok := request.(SearchMovieRequest); ok {
+		q := r.URL.Query()
+		q.Add("keyword", req.Keyword)
+		q.Add("page_number", strconv.Itoa(req.PageNumber))
+		r.URL.RawQuery = q.Encode()
+
+		return nil
+	} else {
+		return errors.New("request format is wrong")
 	}
-	r.Body = ioutil.NopCloser(&buf)
-	return nil
 }
 
 func decodeSearchMovieHTTPResponse(_ context.Context, r *http.Response) (interface{}, error) {
