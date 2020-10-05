@@ -26,7 +26,7 @@ func makeSearchMovieClientEndpoint(movieServiceURL *url.URL) endpoint.Endpoint {
 	searchMovieURL, _ := helper.JoinURL(movieServiceURL, "/movie")
 
 	searchMovieClientEndpoint := httptransport.NewClient(
-		http.MethodPost,
+		http.MethodGet,
 		searchMovieURL,
 		encodeSearchMovieHTTPRequest,
 		decodeSearchMovieHTTPResponse,
